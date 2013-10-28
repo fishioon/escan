@@ -50,4 +50,5 @@ protected:
 private:
 
     HANDLE m_hFinishedEvent;
+	bool m_running;
 };

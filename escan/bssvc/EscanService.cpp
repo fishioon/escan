@@ -24,6 +24,8 @@
 #pragma comment(lib, "wtsapi32.lib")
 #include <userenv.h>
 #pragma comment(lib, "userenv.lib")
+
+#include "Bssvc.h"
 #pragma endregion
 
 
@@ -31,6 +33,20 @@ DWORD GetSessionIdOfUser(PCWSTR, PCWSTR);
 BOOL DisplayInteractiveMessage(DWORD, PWSTR, PWSTR, DWORD, BOOL, DWORD, DWORD *);
 BOOL CreateInteractiveProcess(DWORD, PWSTR, BOOL, DWORD, DWORD *);
 
+int FindThreatCall(void *parm, SampleInfo *sample)
+{
+	// Get the ID of the session attached to the physical console.
+	DWORD dwSessionId = GetSessionIdOfUser(NULL, NULL);
+	if (dwSessionId == 0xFFFFFFFF)
+		return -1;
+
+	wchar_t szCommandLine[] = L"c:\\windows\\notepad.exe";
+	DWORD dwExitCode;
+	if (!CreateInteractiveProcess(dwSessionId, szCommandLine, FALSE, 0,
+		&dwExitCode))
+		return -1;
+	return 0;
+}
 
 CEscanService::CEscanService(PWSTR pszServiceName, 
                                BOOL fCanStop, 
@@ -57,38 +73,8 @@ CEscanService::~CEscanService(void)
     }
 }
 
-
-//
-//   FUNCTION: CSampleService::OnStart(DWORD, LPWSTR *)
-//
-//   PURPOSE: The function is executed when a Start command is sent to the 
-//   service by the SCM or when the operating system starts (for a service 
-//   that starts automatically). It specifies actions to take when the 
-//   service starts. In this code sample, OnStart logs a service-start 
-//   message to the Application log, and queues the main service function for 
-//   execution in a thread pool worker thread.
-//
-//   PARAMETERS:
-//   * dwArgc   - number of command line arguments
-//   * lpszArgv - array of command line arguments
-//
-//   NOTE: A service application is designed to be long running. Therefore, 
-//   it usually polls or monitors something in the system. The monitoring is 
-//   set up in the OnStart method. However, OnStart does not actually do the 
-//   monitoring. The OnStart method must return to the operating system after 
-//   the service's operation has begun. It must not loop forever or block. To 
-//   set up a simple monitoring mechanism, one general solution is to create 
-//   a timer in OnStart. The timer would then raise events in your code 
-//   periodically, at which time your service could do its monitoring. The 
-//   other solution is to spawn a new thread to perform the main service 
-//   functions, which is demonstrated in this code sample.
-//
 void CEscanService::OnStart(DWORD dwArgc, LPWSTR *lpszArgv)
 {
-    // Log a service start message to the Application log.
-//    WriteEventLogEntry(L"CppInteractiveWindowsService in OnStart", 
-//        EVENTLOG_INFORMATION_TYPE);
-
     // Queue the main service function for execution in a worker thread.
     CThreadPool::QueueUserWorkItem(&CEscanService::ServiceWorkerThread, this);
 }
@@ -102,43 +88,23 @@ void CEscanService::OnStart(DWORD dwArgc, LPWSTR *lpszArgv)
 //
 void CEscanService::ServiceWorkerThread(void)
 {
-    // Get the ID of the session attached to the physical console.
-    DWORD dwSessionId = GetSessionIdOfUser(NULL, NULL);
-    if (dwSessionId == 0xFFFFFFFF)
-    {
-        // Log the error and exit.
-        WriteErrorLogEntry(L"GetSessionIdOfUser", GetLastError());
-        goto Exit;
-    }
+	Bssvc *bs = new Bssvc();
+	int res = bs->Init(FindThreatCall, this);
+	if (res)
+	{
+		WriteErrorLogEntry(L"Bssvc Init", res);
+		goto Exit;
+	}
+	m_running = true;
 
-    // Display an interactive message in the session.
-    wchar_t szTitle[] = L"CppInteractiveWindowsService";
-    wchar_t szMessage[] = L"Do you want to start Notepad?";
-    DWORD dwResponse;
-    if (!DisplayInteractiveMessage(dwSessionId, szTitle, szMessage, MB_YESNO, 
-        TRUE, 5 /*5 seconds*/, &dwResponse))
-    {
-        // Log the error and exit.
-        WriteErrorLogEntry(L"DisplayInteractiveMessage", GetLastError());
-        goto Exit;
-    }
-
-    if (IDYES == dwResponse) // If the user choose 'Yes'
-    {
-        // Launch notepad.
-        wchar_t szCommandLine[] = L"notepad.exe";
-        DWORD dwExitCode;
-        if (!CreateInteractiveProcess(dwSessionId, szCommandLine, FALSE, 0, 
-            &dwExitCode))
-        {
-            // Log the error and exit.
-            WriteErrorLogEntry(L"CreateInteractiveProcess", GetLastError());
-            goto Exit;
-        }
-    }
+	while (m_running)
+	{
+		Sleep(1000);
+	}
 
 Exit:
     // Signal the finished event.
+	delete bs;
     SetEvent(m_hFinishedEvent);
 }
 
@@ -157,10 +123,7 @@ Exit:
 //
 void CEscanService::OnStop()
 {
-    // Log a service stop message to the Application log.
-    //WriteEventLogEntry(L"CppInteractiveWindowsService in OnStop", 
-    //    EVENTLOG_INFORMATION_TYPE);
-
+	m_running = false;
     // Wait for the finish of the main service function (ServiceWorkerThread).
     if (WaitForSingleObject(m_hFinishedEvent, INFINITE) != WAIT_OBJECT_0)
     {
