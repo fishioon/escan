@@ -17,7 +17,7 @@ public:
 
 private:
 	Ecall m_ecall;
-	Escan *m_es;
+	escan m_es;
 
 };
 
