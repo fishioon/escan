@@ -30,6 +30,9 @@
     <ClCompile Include="md5.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="queue.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="http.h">
@@ -39,6 +42,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="db.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="queue.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bssvc", "bssvc\bssvc.vcxproj", "{4EAC30AB-DF8C-43A6-865E-448E52344028}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "escan", "escan\escan.vcxproj", "{C070A179-C506-46D2-86AF-39AB6DAC1B6E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "eui", "eui\eui.vcxproj", "{BC7C5779-AA46-4CBC-920E-198B2841B967}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +21,10 @@ Global
 		{C070A179-C506-46D2-86AF-39AB6DAC1B6E}.Debug|Win32.Build.0 = Debug|Win32
 		{C070A179-C506-46D2-86AF-39AB6DAC1B6E}.Release|Win32.ActiveCfg = Release|Win32
 		{C070A179-C506-46D2-86AF-39AB6DAC1B6E}.Release|Win32.Build.0 = Release|Win32
+		{BC7C5779-AA46-4CBC-920E-198B2841B967}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BC7C5779-AA46-4CBC-920E-198B2841B967}.Debug|Win32.Build.0 = Debug|Win32
+		{BC7C5779-AA46-4CBC-920E-198B2841B967}.Release|Win32.ActiveCfg = Release|Win32
+		{BC7C5779-AA46-4CBC-920E-198B2841B967}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

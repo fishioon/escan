@@ -3,8 +3,6 @@
 #include <Windows.h>
 #include "escan.h"
 
-using namespace std;
-
 class Bssvc
 {
 public:
@@ -17,7 +15,7 @@ public:
 
 private:
 	Ecall m_ecall;
-	escan m_es;
+	Escan *m_es;
 
 };
 

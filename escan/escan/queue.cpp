@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "queue.h"
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +7,17 @@
 #define FLAG_ENTER	1
 #define FLAG_READY	2
 #define FLAG_DEQUE	3
-		
+
+typedef struct _queue
+{
+    int element_size;
+    int element_num;
+    int length;
+    int index_head;
+    int index_tail;
+    char *flags;
+    char *data;
+} Queue;
 
 Queue* QueueInit(int power_num, int element_size)
 {
@@ -19,7 +28,7 @@ Queue* QueueInit(int power_num, int element_size)
 	q->flags = (char *)calloc(1, q->length);
 	return q;
 }
-int EnQueue(Queue *queue, void *element)
+int QueuePush(Queue *queue, void *element)
 {
 	if (queue->element_num >= queue->length)
 		return -1;
@@ -48,7 +57,7 @@ int EnQueue(Queue *queue, void *element)
 
 	return queue->element_num;
 }
-int DeQueue(Queue *queue, void *element)
+int QueuePop(Queue *queue, void *element)
 {
 	if (queue->element_num <= 0)
 		return -1;
@@ -82,5 +91,5 @@ void QueueFree(Queue *queue)
 		free(queue->flags);
 	if (queue->data)
 		free(queue->data);
-	free(queue);
+    free(queue);
 }
